@@ -9,4 +9,8 @@ Rails.application.routes.draw do
       registrations: "users/registrations"
     },
     defaults: { format: :json }
+
+  namespace :api do
+    resources :boards, only: [ :index, :show, :create, :destroy ]
+  end
 end
