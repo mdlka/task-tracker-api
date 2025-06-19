@@ -1,7 +1,7 @@
 class Api::BoardsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_board, only: [ :show, :destroy ]
-  before_action :valid_board_access, only: [ :show, :destroy ]
+  before_action :validate_board_access!, only: [ :show, :destroy ]
 
   def index
     render json: Board.where(user_id: current_user.id)
@@ -31,7 +31,7 @@ class Api::BoardsController < ApplicationController
     @board = Board.find(params[:id])
   end
 
-  def valid_board_access
-    head :forbidden if @board.user_id != current_user.id
+  def validate_board_access!
+    head :forbidden unless @board.user_id == current_user.id
   end
 end
