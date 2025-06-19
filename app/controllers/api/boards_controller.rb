@@ -1,7 +1,7 @@
 class Api::BoardsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_board, only: [ :show, :destroy ]
-  before_action :validate_edit_board_access!, only: [ :destroy ]
+  before_action :set_board, only: [ :show, :update, :destroy ]
+  before_action :validate_edit_board_access!, only: [ :update, :destroy ]
   before_action :validate_view_board_access!, only: [ :show ]
 
   def index
@@ -28,6 +28,14 @@ class Api::BoardsController < ApplicationController
     end
   end
 
+  def update
+    if @board.update(board_params)
+      render json: BoardResource.new(@board).serialize
+    else
+      render json: { errors: board.errors.full_messages }, status: :unprocessable_content
+    end
+  end
+
   def destroy
     @board.destroy
   end
@@ -43,15 +51,18 @@ class Api::BoardsController < ApplicationController
   end
 
   def validate_edit_board_access!
-    head :forbidden unless validate_edit_board_access
+    head :forbidden unless board_owner?
   end
 
   def validate_view_board_access!
-    head :forbidden unless validate_edit_board_access ||
-      BoardMembership.exists?(board_id: @board.id, user_id: current_user.id)
+    head :forbidden unless board_owner? || board_member?
   end
 
-  def validate_edit_board_access
+  def board_owner?
     @board.user_id == current_user.id
+  end
+
+  def board_member?
+    BoardMembership.exists?(board_id: @board.id, user_id: current_user.id)
   end
 end
