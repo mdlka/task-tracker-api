@@ -17,7 +17,7 @@ class Api::BoardsController < ApplicationController
     if board.save
       render json: board, status: :created, location: api_board_url(board)
     else
-      render json: board.errors.full_messages, status: :unprocessable_content
+      render json: { errors: board.errors.full_messages }, status: :unprocessable_content
     end
   end
 
