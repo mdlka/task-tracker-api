@@ -1,12 +1,14 @@
 class Api::TasksController < ApplicationController
+  include BoardAccessible
+
   before_action :authenticate_user!
   before_action :set_task, only: [ :show, :update, :destroy ]
   before_action :validate_task_access!, only: [ :show, :update, :destroy ]
-  before_action :validate_edit_board_access!, only: [ :create, :update, :destroy ]
   before_action :validate_view_board_access!, only: [ :index, :show ]
+  before_action :validate_edit_board_access!, only: [ :create, :update, :destroy ]
 
   def index
-    tasks = Board.find(params[:board_id]).tasks
+    tasks = find_board.tasks
     render json: TaskResource.new(tasks).serialize
   end
 
@@ -48,22 +50,6 @@ class Api::TasksController < ApplicationController
   end
 
   def validate_task_access!
-    head :forbidden unless @task.board_id == params[:board_id].to_i
-  end
-
-  def validate_edit_board_access!
-    head :forbidden unless board_owner?
-  end
-
-  def validate_view_board_access!
-    head :forbidden unless board_owner? || board_member?
-  end
-
-  def board_owner?
-    Board.find(params[:board_id]).user_id == current_user.id
-  end
-
-  def board_member?
-    BoardMembership.exists?(board_id: params[:board_id], user_id: current_user.id)
+    head :forbidden unless @task.belongs_to_board?(params[:board_id])
   end
 end

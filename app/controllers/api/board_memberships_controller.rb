@@ -1,17 +1,20 @@
 class Api::BoardMembershipsController < ApplicationController
+  include BoardAccessible
+
   before_action :authenticate_user!
-  before_action :validate_board_access!
+  before_action :validate_view_board_access!, only: [ :index ]
+  before_action :validate_edit_board_access!, only: [ :update, :destroy ]
 
   def index
-    members = Board.find(params[:board_id]).users.all
-    render json: UserResource.new(members).serialize, status: :ok
+    members = find_board.users
+    render json: UserResource.new(members).serialize
   end
 
   def update
     membership = BoardMembership.new(membership_params)
 
     if membership.save
-      render json: BoardMembershipResource.new(membership).serialize, status: :ok
+      render json: BoardMembershipResource.new(membership).serialize
     else
       render json: { errors: membership.errors.full_messages }, status: :unprocessable_content
     end
@@ -26,13 +29,5 @@ class Api::BoardMembershipsController < ApplicationController
 
   def membership_params
     { board_id: params[:board_id], user_id: params[:id] }
-  end
-
-  def validate_board_access!
-    head :forbidden unless board_owner?
-  end
-
-  def board_owner?
-    Board.find(params[:board_id]).user_id == current_user.id
   end
 end
