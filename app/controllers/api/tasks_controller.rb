@@ -4,18 +4,19 @@ class Api::TasksController < ApplicationController
 
   def index
     tasks = Board.find(params[:board_id]).tasks
-    render json: tasks
+    render json: TaskResource.new(tasks).serialize
   end
 
   def show
-    render json: @task
+    render json: TaskResource.new(@task).serialize
   end
 
   def create
     task = Task.new(task_params.merge(board_id: params[:board_id]))
 
     if task.save
-      render json: task, status: :created, location: api_board_task_url(board_id: params[:board_id], id: task.id)
+      render json: TaskResource.new(task).serialize, status: :created,
+             location: api_board_task_url(board_id: params[:board_id], id: task.id)
     else
       render json: { errors: task.errors.full_messages }, status: :unprocessable_content
     end
@@ -23,7 +24,7 @@ class Api::TasksController < ApplicationController
 
   def update
     if @task.update(task_params)
-      render json: @task
+      render json: TaskResource.new(@task).serialize
     else
       render json: { errors: @task.errors.full_messages }, status: :unprocessable_content
     end
