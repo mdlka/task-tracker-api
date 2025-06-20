@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   namespace :api do
     resources :boards, only: [ :index, :show, :create, :update, :destroy ] do
       resources :memberships, only: [ :index, :update, :destroy ], controller: :board_memberships
+      resources :tasks, only: [ :index, :show, :create, :update, :destroy ]
     end
   end
 end
