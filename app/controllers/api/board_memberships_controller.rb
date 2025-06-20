@@ -29,6 +29,10 @@ class Api::BoardMembershipsController < ApplicationController
   end
 
   def validate_board_access!
-    head :forbidden unless Board.find(params[:board_id]).user_id == current_user.id
+    head :forbidden unless board_owner?
+  end
+
+  def board_owner?
+    Board.find(params[:board_id]).user_id == current_user.id
   end
 end
