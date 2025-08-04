@@ -38,7 +38,7 @@ gem "rack-cors"
 gem "devise"
 gem "devise-jwt"
 
-gem "alba", "~> 3.7", ">= 3.7.2"
+gem "alba", "~> 3.8"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
